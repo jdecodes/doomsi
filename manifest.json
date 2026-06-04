@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Doomsi",
+  "version": "1.0.0",
+  "description": "Reminds you to stop doomscrolling and shows a funny overlay when time's up.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "scripting",
+    "tabs",
+    "activeTab"
+    
+  ],
+  "host_permissions": [
+    "https://api.kanye.rest/*",
+    "https://meme-api.com/*"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
+  "options_ui": {
+    "page": "ui/options.html",
+    "open_in_tab": true
+  },
+  "action": {
+    "default_popup": "ui/popup.html",
+    "default_title": "Doomsi"
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*", "content/overlay/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

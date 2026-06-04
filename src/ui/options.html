@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Doomsi Blocker Dashboard</title>
+    <style>
+      :root {
+        --bg: linear-gradient(135deg, #0f172a 0%, #111827 45%, #0b3b56 100%);
+        --panel: rgba(255, 255, 255, 0.08);
+        --text: #f8fafc;
+        --muted: #cbd5e1;
+        --accent: #f59e0b;
+        --accent2: #14b8a6;
+        --danger: #dc2626;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+      h1 { margin: 0 0 14px; font-size: 30px; }
+      .subtitle { margin: 0 0 16px; color: var(--muted); }
+      .panel {
+        background: var(--panel);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 16px;
+        backdrop-filter: blur(8px);
+      }
+      .grid { display: grid; gap: 12px; }
+      .grid-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+      label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+      input[type="number"], input[type="text"], input[type="url"] {
+        width: 100%;
+        border: 1px solid rgba(255,255,255,0.35);
+        background: rgba(2, 6, 23, 0.4);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 9px;
+      }
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      #saveGlobal { background: var(--accent); color: #111827; }
+      #exportBackup { background: #334155; color: var(--text); }
+      #importBackupBtn { background: var(--accent2); color: #06231f; }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+      }
+      .metric {
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(2, 6, 23, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+      }
+      .metric-title { color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+      .metric-value { font-size: 24px; font-weight: 700; }
+      .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+      .tab {
+        background: rgba(30, 41, 59, 0.8);
+        color: var(--text);
+        border: 1px solid rgba(255,255,255,0.2);
+      }
+      .tab.active { background: var(--accent); color: #111827; border-color: transparent; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 9px; border-bottom: 1px solid rgba(255,255,255,0.12); text-align: left; }
+      th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+      .site-cell { display: flex; align-items: center; gap: 10px; }
+      .site-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.12);
+        object-fit: cover;
+      }
+      .site-name { font-weight: 700; line-height: 1.1; }
+      .site-host { color: var(--muted); font-size: 12px; line-height: 1.1; margin-top: 3px; }
+      .status { color: #bef264; min-height: 18px; }
+      .error { color: #fca5a5; }
+      @media (max-width: 720px) {
+        h1 { font-size: 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Doomsi Analytics Dashboard</h1>
+      <p class="subtitle">Track usage, tune thresholds, and backup your data.</p>
+
+      <section class="panel">
+        <div class="tabs">
+          <button class="tab active" data-period="daily">Daily</button>
+          <button class="tab" data-period="weekly">Weekly</button>
+          <button class="tab" data-period="monthly">Monthly</button>
+          <button class="tab" data-period="yearly">Yearly</button>
+        </div>
+
+        <div class="metrics" id="metrics">
+          <div class="metric"><div class="metric-title">Total Time</div><div class="metric-value" id="totalTime">0 min</div></div>
+          <div class="metric"><div class="metric-title">Total Sites</div><div class="metric-value" id="totalSites">0</div></div>
+          <div class="metric"><div class="metric-title">Tabs Opened</div><div class="metric-value" id="tabsOpened">0</div></div>
+          <div class="metric"><div class="metric-title">Tab Switches</div><div class="metric-value" id="tabSwitches">0</div></div>
+        </div>
+
+        <h3 style="margin:14px 0 8px;">Top 10 Usage</h3>
+        <table>
+          <thead>
+            <tr><th>#</th><th>Site</th><th>Minutes</th></tr>
+          </thead>
+          <tbody id="top10Body"></tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <h2>Global Settings</h2>
+        <div class="grid grid-3">
+          <div>
+            <label for="maxMinutes">Default threshold (1-30 min)</label>
+            <input id="maxMinutes" type="number" min="1" max="30" />
+          </div>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="saveGlobal">Save Settings</button>
+          <button id="exportBackup" type="button">Export Backup</button>
+          <button id="importBackupBtn" type="button">Import Backup</button>
+          <input id="importBackup" type="file" accept="application/json" style="display:none;" />
+        </div>
+        <div id="settingsStatus" class="status"></div>
+      </section>
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>

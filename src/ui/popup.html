@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Doomsi</title>
+  <!-- Use bundled/system fonts to avoid remote dependencies (Web Store friendly) -->
+  <style>
+    :root {
+      --grad-a: #7c3aed;
+      --grad-b: #4f46e5;
+      --grad-c: #0ea5e9;
+      --glass-bg: rgba(10, 10, 20, 0.82);
+      --glass-surface: rgba(255, 255, 255, 0.055);
+      --glass-surface-hover: rgba(255, 255, 255, 0.09);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-border-strong: rgba(255, 255, 255, 0.18);
+      --text-primary: rgba(255, 255, 255, 0.95);
+      --text-secondary: rgba(255, 255, 255, 0.5);
+      --text-tertiary: rgba(255, 255, 255, 0.28);
+      --accent-purple: #a78bfa;
+      --accent-blue: #60a5fa;
+      --accent-cyan: #38bdf8;
+      --accent-green: #34d399;
+      --accent-red: #f87171;
+      --danger: #ef4444;
+      --premium-gold: #fbbf24;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 340px;
+      min-height: 520px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--glass-bg);
+      color: var(--text-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Gradient orbs background */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: -60px;
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.35) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; right: -40px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.28) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .popup-inner {
+      position: relative;
+      z-index: 1;
+      padding: 16px;
+    }
+
+    /* === HEADER === */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--grad-a), var(--grad-c));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .header-text {}
+    .header-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .header-sub {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 1px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .pill-tab {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 0.5px solid var(--glass-border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill-tab.active {
+      background: var(--glass-surface-hover);
+      color: var(--text-primary);
+      border-color: var(--glass-border-strong);
+    }
+    .pill-tab:hover { background: var(--glass-surface); color: var(--text-primary); }
+
+    /* === STATS ROW === */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: var(--glass-surface);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 9px 8px;
+      text-align: center;
+    }
+    .stat-card.featured {
+      background: linear-gradient(135deg, rgba(124,58,237,0.28), rgba(14,165,233,0.18));
+      border-color: rgba(124,58,237,0.35);
+    }
+    .stat-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+    .stat-card.featured .stat-val {
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      margin-top: 3px;
+      letter-spacing: 0.02em;
+    }
+
+    /* === FOCUS SCORE BAND === */
+    .focus-band {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--glass-surface);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+    .focus-ring-wrap {
+      position: relative;
+      width: 48px; height: 48px;
+      flex-shrink: 0;
+    }
+    .focus-ring-wrap svg { width: 48px; height: 48px; }
+    .focus-ring-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .focus-score-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      line-height: 1;
+    }
+    .focus-score-sub {
+      font-size: 9px;
+      color: var(--text-tertiary);
+      margin-top: 1px;
+    }
+    .focus-info { flex: 1; }
+    .focus-info-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .focus-info-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+    .focus-bar-wrap {
+      margin-top: 6px;
+    }
+    .focus-bar-bg {
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .focus-bar-fill {
+      height: 3px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* === TOP SITES === */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .refresh-btn:hover { background: var(--glass-surface); color: var(--text-secondary); }
+    .refresh-btn:disabled { opacity: 0.4; cursor: default; }
+    .refresh-icon { display: inline-block; font-size: 12px; transition: transform 0.4s; }
+    .refresh-btn.spinning .refresh-icon { animation: spin 0.7s linear infinite; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .sites-list { margin-bottom: 12px; }
+    .site-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px 0;
+      border-top: 0.5px solid rgba(255,255,255,0.04);
+    }
+    .site-row:first-child { border-top: none; }
+    .site-favicon {
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      background: var(--glass-surface);
+      border: 0.5px solid var(--glass-border);
+      object-fit: cover;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      overflow: hidden;
+    }
+    .site-favicon img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
+    .site-name {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .site-bar-wrap { width: 52px; }
+    .site-bar-bg {
+      height: 3px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .site-bar-fill {
+      height: 3px;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    .site-time {
+      font-size: 12px;
+      color: var(--text-secondary);
+      width: 40px;
+      text-align: right;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      flex-shrink: 0;
+    }
+    .usage-status {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      text-align: right;
+      margin-bottom: 10px;
+      margin-top: -6px;
+    }
+
+    /* === SITE CONTROLS === */
+    .controls-card {
+      background: var(--glass-surface);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .controls-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .controls-left {}
+    .controls-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .controls-host {
+      font-size: 11px;
+      color: var(--accent-cyan);
+      margin-top: 2px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+    .premium-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--premium-gold);
+      background: rgba(251, 191, 36, 0.1);
+      border: 0.5px solid rgba(251, 191, 36, 0.25);
+      border-radius: 20px;
+      padding: 3px 9px;
+    }
+
+    /* Toggle switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 38px; height: 22px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0; width: 0; height: 0; position: absolute;
+    }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.1);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      top: 2px; left: 2px;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-track {
+      background: linear-gradient(90deg, var(--grad-a), var(--grad-c));
+      border-color: transparent;
+    }
+    .toggle-switch input:checked + .toggle-track::after {
+      transform: translateX(16px);
+      background: #fff;
+    }
+    .toggle-switch input:disabled + .toggle-track {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .toggle-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Threshold row */
+    .threshold-row {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+    }
+    .threshold-input {
+      flex: 1;
+      padding: 7px 10px;
+      background: rgba(0,0,0,0.25);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .threshold-input:focus { border-color: var(--glass-border-strong); }
+    .threshold-input:disabled { opacity: 0.4; cursor: not-allowed; }
+    .threshold-label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+    .save-btn {
+      background: linear-gradient(135deg, var(--grad-a), var(--grad-c));
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .save-btn:hover { opacity: 0.88; }
+    .save-btn:active { transform: scale(0.97); }
+    .save-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .allow-btn {
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .allow-btn:hover { opacity: 0.85; }
+
+    /* === FOOTER === */
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dashboard-link {
+      font-size: 11px;
+      color: var(--accent-purple);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 0.5px solid transparent;
+      transition: all 0.15s;
+    }
+    .dashboard-link:hover {
+      color: var(--accent-cyan);
+      background: var(--glass-surface);
+      border-color: var(--glass-border);
+    }
+    .status-text {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+    #status { display: none; }
+
+    /* Patreon Card */
+    .patreon-card {
+      background: var(--glass-surface);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 16px 12px;
+      margin-bottom: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .patreon-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .patreon-btn {
+      font-size: 14px;
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .patreon-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .patreon-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Bar colors */
+    .bar-purple { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .bar-red    { background: linear-gradient(90deg, #dc2626, #f87171); }
+    .bar-indigo { background: linear-gradient(90deg, #4338ca, #818cf8); }
+    .bar-sky    { background: linear-gradient(90deg, #0369a1, #38bdf8); }
+    .bar-teal   { background: linear-gradient(90deg, #0f766e, #34d399); }
+    .bar-amber  { background: linear-gradient(90deg, #b45309, #fbbf24); }
+
+    #allowBtn { display: none; }
+  </style>
+</head>
+<body>
+  <div class="popup-inner">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo-icon">🛡</div>
+        <div class="header-text">
+          <div class="header-title">Doomsi</div>
+          <div id="headerDate" class="header-sub">—</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="pill-tab active" id="tabToday" style="display:none">Today</button>
+        <button class="pill-tab" id="tabWeek" style="display:none">Week</button>
+        <a class="dashboard-link" href="options.html" target="_blank" rel="noopener noreferrer">
+          ↗ Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card featured" id="totalTimeCard">
+        <div class="stat-val" id="statTotalTime">—</div>
+        <div class="stat-label">min today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statSites">—</div>
+        <div class="stat-label">sites</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statTabs">—</div>
+        <div class="stat-label">tabs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statSwitches">—</div>
+        <div class="stat-label">switches</div>
+      </div>
+    </div>
+
+
+    <!-- 
+    <div class="focus-band">
+      <div class="focus-ring-wrap">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="19" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>
+          <circle id="focusArc" cx="24" cy="24" r="19"
+            stroke="url(#focusGrad)" stroke-width="5"
+            stroke-linecap="round"
+            stroke-dasharray="0 120"
+            transform="rotate(-90 24 24)"
+            style="transition: stroke-dasharray 0.7s cubic-bezier(0.34,1.56,0.64,1)"/>
+          <defs>
+            <linearGradient id="focusGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#0ea5e9"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="focus-ring-center">
+          <div class="focus-score-val" id="focusScore">—</div>
+          <div class="focus-score-sub">focus</div>
+        </div>
+      </div>
+      <div class="focus-info">
+        <div class="focus-info-title" id="focusTitle">Calculating…</div>
+        <div class="focus-info-desc" id="focusDesc">Loading your usage data</div>
+        <div class="focus-bar-wrap">
+          <div class="focus-bar-bg">
+            <div class="focus-bar-fill" id="focusBarFill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  -->
+    <!-- Top 5 Sites -->
+    <div class="section-header">
+      <div class="section-title">Top sites</div>
+      <button class="refresh-btn" id="refresh">
+        <span class="refresh-icon">↻</span> Refresh
+      </button>
+    </div>
+    <div class="sites-list" id="top5"></div>
+    <div class="usage-status" id="usageStatus">Last update: —</div>
+
+    <!-- Site Controls -->
+    <div class="controls-card">
+      <div class="controls-top">
+        <div class="controls-left">
+          <div class="controls-label">This site</div>
+          <div class="controls-host" id="controlsHost">—</div>
+        </div>
+        <div class="premium-badge">✦ Coming soon</div>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle-switch">
+          <input type="checkbox" id="siteEnabled" disabled checked />
+          <span class="toggle-track"></span>
+        </label>
+        <span class="toggle-label">Enable timer for this site</span>
+      </div>
+      <div class="threshold-row">
+        <input class="threshold-input" id="siteThreshold" type="number" min="1" max="30" value="1" disabled placeholder="min"/>
+        <span class="threshold-label">min (max 30)</span>
+        <button class="save-btn" id="saveSite" disabled>Save</button>
+        <button class="allow-btn" id="allowBtn">Allow</button>
+      </div>
+    </div>
+
+    <!-- Patreon Card -->
+    <div class="patreon-card">
+      <div class="patreon-label">Love Doomsi? Support the project</div>
+      <button class="patreon-btn" id="patreonBtn" title="Support on Patreon">♥ Become a Patron</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="status-text" id="status"></div>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

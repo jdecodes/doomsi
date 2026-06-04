@@ -1,0 +1,13 @@
+{
+  "name": "doomsi",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc --project tsconfig.json && mkdir -p build/ui && cp -r src/assets build/assets || true && mkdir -p build/content && cp -r src/content/* build/content/ || true && cp src/ui/*.html build/ui/ || true && cp manifest.json build/ || true",
+    "watch": "tsc -w --project tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/chrome": "^0.0.190"
+  }
+}
